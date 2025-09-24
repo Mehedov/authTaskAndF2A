@@ -1,12 +1,13 @@
 import { useState } from 'react'
-import Form2FA from '../Form/Form2FA'
+import Form2FA from '../Form/Form2FA/Form2FA'
 import FormLogin from '../Form/FormLogin/FormLogin'
 
 export default function Auth() {
-	const [step] = useState<'login' | '2fa'>('login')
+	const [step, setStep] = useState<'login' | '2fa'>('2fa')
 
-	if (step === '2fa') {
-		return <Form2FA />
-	}
-	return step === 'login' ? <FormLogin /> : <Form2FA />
+	return (
+		<div>
+			{step === 'login' ? <FormLogin setStep={setStep} /> : <Form2FA />}
+		</div>
+	)
 }
