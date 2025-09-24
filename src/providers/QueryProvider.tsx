@@ -3,7 +3,7 @@ import { type PropsWithChildren } from 'react'
 
 const queryClient = new QueryClient()
 
-export default function Providers({ children }: PropsWithChildren<unknown>) {
+export default function QueryProvider({ children }: PropsWithChildren<unknown>) {
 	return (
 		<QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
 	)
