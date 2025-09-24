@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import Form2FA from '../Form/Form2FA'
-import FormLogin from '../Form/FormLogin'
+import FormLogin from '../Form/FormLogin/FormLogin'
 
 export default function Auth() {
 	const [step] = useState<'login' | '2fa'>('login')
