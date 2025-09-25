@@ -1,5 +1,6 @@
 import logo from '@/assets/logo.svg'
 import { useLoginMutation } from '@/services/authServices'
+import type { ErrorMessageRes, LoginResponse } from '@/services/mockApi'
 import { type ILoginAuth } from '@/types/authTypes'
 import { LockOutlined, UserOutlined } from '@ant-design/icons'
 import { Button, Card, Form, Input, Typography } from 'antd'
@@ -17,16 +18,23 @@ export default function FormLogin({ setStep }: Props) {
 		email: '',
 		password: '',
 	})
+	const [response, setResponse] = useState<
+		LoginResponse | ErrorMessageRes | null
+	>(null)
 
 	const loginMutation = useLoginMutation()
-
 
 	const handleLogin = async (values: ILoginAuth) => {
 		try {
 			const res = await loginMutation.mutateAsync(values)
+			setResponse(res)
+			if ('status' in res) {
+				return Promise.reject(res)
+			}
 			if (res.requires2FA) {
 				setStep('2fa')
 			}
+			return res
 		} catch (e) {
 			console.log(e)
 		}
@@ -38,11 +46,7 @@ export default function FormLogin({ setStep }: Props) {
 				width: '440px',
 			}}
 		>
-			<Form
-				// form={form}
-				name='login'
-				// onFinish={onFinish}
-			>
+			<Form name='login'>
 				<div className={styles.logo}>
 					<img src={logo} alt='Logo Company' />
 				</div>
@@ -55,9 +59,7 @@ export default function FormLogin({ setStep }: Props) {
 				</div>
 				<Form.Item
 					name='Email'
-					rules={[
-						{ required: true, message: 'Пожалуйста введите свой Email!' },
-					]}
+					rules={[{ required: true, message: 'Введите свой Email' }]}
 				>
 					<Input
 						prefix={<UserOutlined />}
@@ -67,11 +69,12 @@ export default function FormLogin({ setStep }: Props) {
 						}
 						width={376}
 						placeholder='Username'
+						status={response && 'status' in response ? 'error' : ''}
 					/>
 				</Form.Item>
 				<Form.Item
 					name='password'
-					rules={[{ required: true, message: 'Please input your password!' }]}
+					rules={[{ required: true, message: 'Введите свой пароль' }]}
 				>
 					<Input
 						prefix={<LockOutlined />}
@@ -82,29 +85,22 @@ export default function FormLogin({ setStep }: Props) {
 						onChange={e =>
 							setFormData(prev => ({ ...prev, password: e.target.value }))
 						}
+						status={response && 'status' in response ? 'error' : ''}
 					/>
 				</Form.Item>
+				{response && 'message' in response ? response.message : null}
 				<Form.Item shouldUpdate>
-					{() => (
-						<Button
-							style={{
-								width: '100%',
-							}}
-							type='primary'
-							htmlType='submit'
-							onClick={() => handleLogin(formData)}
-							size='large'
-
-							// disabled={
-							// 	!clientReady ||
-							// 	!form.isFieldsTouched(true) ||
-							// 	!!form.getFieldsError().filter(({ errors }) => errors.length)
-							// 		.length
-							// }
-						>
-							Log in
-						</Button>
-					)}
+					<Button
+						style={{
+							width: '100%',
+						}}
+						type='primary'
+						htmlType='submit'
+						onClick={() => handleLogin(formData)}
+						size='large'
+					>
+						Log in 
+					</Button>
 				</Form.Item>
 			</Form>
 		</Card>

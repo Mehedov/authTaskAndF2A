@@ -8,21 +8,21 @@ export type ErrorMessageRes = {
 export const mockLoginApi = async (
 	email: string,
 	password: string
-): Promise<LoginResponse> => {
+): Promise<LoginResponse | ErrorMessageRes> => {
 	if (!email.includes('@')) {
-		throw { status: 400, message: 'Некорректная почта' }
+		return { status: 400, message: 'Некорректная почта' }
 	}
 	if (password.length < 6) {
-		throw { status: 400, message: 'Минимальная длина пароля 6 символов' }
+		return { status: 400, message: 'Минимальная длина пароля 6 символов' }
 	}
 	if (email === 'blocked@company.com') {
-		throw { status: 403, message: 'Аккаунт заблокирован' }
+		return { status: 403, message: 'Аккаунт заблокирован' }
 	}
 	if (email === 'server@company.com') {
-		throw { status: 500, message: 'Ошибка сервера' }
+		return { status: 500, message: 'Ошибка сервера' }
 	}
-	if (email !== 'user@company.com' || password !== 'password123') {
-		throw { status: 401, message: 'Неверный логин или пароль' }
+	if (email !== 'user@user.com' || password !== 'password123') {
+		return { status: 401, message: 'Неверный логин или пароль' }
 	}
 
 	return { success: true, requires2FA: true }
