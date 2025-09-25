@@ -1,5 +1,9 @@
 export type LoginResponse = { success: boolean; requires2FA?: boolean }
 export type TwoFAResponse = { success: boolean }
+export type ErrorMessageRes = {
+	status: number
+	message: string
+}
 
 export const mockLoginApi = async (
 	email: string,
@@ -24,12 +28,14 @@ export const mockLoginApi = async (
 	return { success: true, requires2FA: true }
 }
 
-export const mock2FAApi = async (authCode: string): Promise<TwoFAResponse> => {
+export const mock2FAApi = async (
+	authCode: string
+): Promise<TwoFAResponse | ErrorMessageRes> => {
 	if (authCode.length !== 6) {
-		throw { status: 400, message: 'Код должен быть 6 цифр' }
+		return { status: 400, message: 'Код должен быть 6 цифр' }
 	}
 	if (authCode !== '000000') {
-		throw { status: 401, message: 'Неправильный код' }
+		return { status: 401, message: 'Неправильный код' }
 	}
 
 	return { success: true }

@@ -1,32 +1,47 @@
 import logo from '@/assets/logo.svg'
 import { useTwoFAMutation } from '@/services/authServices'
-import type { TwoFAResponse } from '@/services/mockApi'
+import type { ErrorMessageRes, TwoFAResponse } from '@/services/mockApi'
 import { Button, Card, Form, Input, Typography } from 'antd'
-import { useEffect, useState } from 'react'
+import type { OTPRef } from 'antd/es/input/OTP'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import styles from './Form2FA.module.css'
 
 const { Title, Text } = Typography
 
 export default function Form2FA() {
-	const [code, setCode] = useState('')
-	const [response, setResponse] = useState<TwoFAResponse | null>(null)
+	const [code, setCode] = useState('33')
+	const [response, setResponse] = useState<
+		TwoFAResponse | ErrorMessageRes | null
+	>(null)
 	const twoFAMutation = useTwoFAMutation()
+	const otpRef = useRef<OTPRef>(null)
 
-	const handleTwoFAM = async (code: string) => {
-		try {
-			const res = await twoFAMutation.mutateAsync({
-				authCode: code,
-			})
-			setResponse(res)
-		} catch (e) {
-			console.log(e)
-		}
-	}
+	const handleTwoFAM = useCallback(
+		async (code: string) => {
+			try {
+				const res = await twoFAMutation.mutateAsync({
+					authCode: code,
+				})
+				setResponse(res)
+				if ('status' in res) {
+					return Promise.reject(res)
+				}
+				return res
+			} catch (e) {
+				console.log(e)
+			}
+		},
+		[twoFAMutation]
+	)
 
 	useEffect(() => {
 		if (code.length === 6) {
 			handleTwoFAM(code)
 			setCode('')
+			// console.log(response)
+			if (otpRef.current) {
+				otpRef.current.blur()
+			}
 		}
 	}, [code, handleTwoFAM])
 
@@ -36,11 +51,7 @@ export default function Form2FA() {
 				width: '440px',
 			}}
 		>
-			<Form
-				// form={form}
-				name='login'
-				// onFinish={onFinish}
-			>
+			<Form name='f2a'>
 				<div className={styles.logo}>
 					<img src={logo} alt='Logo Company' />
 				</div>
@@ -58,17 +69,15 @@ export default function Form2FA() {
 						display: 'flex',
 						justifyContent: 'center',
 						alignItems: 'center',
+						marginTop: '24px',
 					}}
 				>
 					<Input.OTP
-						style={{
-							marginTop: '24px',
-						}}
 						formatter={str => str.toUpperCase()}
 						size='large'
-						value={code}
+						ref={otpRef}
 						onChange={e => setCode(e)}
-						status={response?.success === false ? 'error' : ''}
+						status={response && 'status' in response ? 'error' : ''}
 					/>
 				</Form.Item>
 				<Form.Item shouldUpdate>
@@ -80,13 +89,6 @@ export default function Form2FA() {
 							type='primary'
 							htmlType='submit'
 							size='large'
-							// onClick={() => handleLogin(formData)}
-							// disabled={
-							// 	!clientReady ||
-							// 	!form.isFieldsTouched(true) ||
-							// 	!!form.getFieldsError().filter(({ errors }) => errors.length)
-							// 		.length
-							// }
 						>
 							Get now
 						</Button>
