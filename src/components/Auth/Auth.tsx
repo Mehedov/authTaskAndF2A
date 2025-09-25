@@ -30,7 +30,7 @@ export default function Auth() {
 			{step === 'login' ? (
 				<FormLogin setStep={setStep} />
 			) : (
-				<Form2FA check2FA={check2FA} />
+				<Form2FA check2FA={check2FA} setStep={setStep} />
 			)}
 		</div>
 	)
