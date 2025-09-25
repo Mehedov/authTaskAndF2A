@@ -1,73 +1,48 @@
-# React + TypeScript + Vite
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Работа ведётся на мок‑данных (без реального бэкенда).
 
-Currently, two official plugins are available:
+- **Моки**: `src/services/mockApi.ts`
+- **Хуки запросов**: `src/services/authServices.ts`
+- **Формы**: `src/components/Form/FormLogin/`, `src/components/Form/Form2FA/`
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Быстрый старт
 
-## React Compiler
-
-The React Compiler is currently not compatible with SWC. See [this issue](https://github.com/vitejs/vite-plugin-react/issues/428) for tracking the progress.
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm i
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Как работают моки
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+- Логин: `mockLoginApi(email, password)`
+  - Успешный кейс для перехода на 2FA: `email: user@user.com`, `password: password123`
+  - Возможные ошибки возвращаются формата `{ status, message }`
+  - Успех: `{ success: true, requires2FA: true }`
+- 2FA: `mock2FAApi(authCode)`
+  - Валидный код: `000000`
+  - Ошибки: длина не 6 символов либо неверный код
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## Пример потока
+
+1. Введите `user@user.com` / `password123` на форме логина.
+2. На экране 2FA введите `000000` и нажмите Continue — получите `{ success: true }`.
+3. При ошибках увидите сообщение из мок‑ответа.
+
+## Короткий пример использования
+
+```ts
+// фрагмент Auth.tsx
+const loginMutation = useLoginMutation()
+const twoFAMutation = useTwoFAMutation()
+
+const handleLogin = async (values: ILoginAuth) => {
+	const res = await loginMutation.mutateAsync(values)
+	if ('status' in res) return
+	if (res.requires2FA) setStep('2fa')
+}
+
+const check2FA = async (code: string) => {
+	const res = await twoFAMutation.mutateAsync({ authCode: code })
+	// обработка res или ошибки
+}
 ```
