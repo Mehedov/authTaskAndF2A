@@ -73,6 +73,7 @@ export default function Form2FA({ check2FA, setStep }: Props) {
 						size='large'
 						ref={otpRef}
 						value={code}
+						// Если вы читаете это сообщение то я понимаю логику эту сохранение value только после полного ввода но когда код стирается в value ничего не приходит а просто сохраняется предыдущее значение
 						onChange={e => {
 							const newCode = e || ''
 							setCode(newCode)
@@ -92,6 +93,7 @@ export default function Form2FA({ check2FA, setStep }: Props) {
 							htmlType='submit'
 							size='large'
 							onClick={() => handleTwoFAM(code)}
+							disabled={response && 'message' in response ? true : false}
 						>
 							Continue
 						</Button>
