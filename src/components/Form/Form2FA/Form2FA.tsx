@@ -108,7 +108,7 @@ export default function Form2FA({ check2FA, setStep }: Props) {
 							onClick={handleGetNow}
 							disabled={cooldownSec > 0}
 						>
-							{cooldownSec > 0 ? `Resend in ${cooldownSec}s` : 'Get now'}
+							{cooldownSec > 0 ? `Get a new code in  ${cooldownSec}s` : 'Get now'}
 						</Button>
 					)}
 				</Form.Item>
