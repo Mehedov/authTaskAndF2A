@@ -82,7 +82,7 @@ export default function Form2FA({ check2FA, setStep }: Props) {
 					/>
 				</Form.Item>
 				{response && 'message' in response ? response.message : null}
-
+				{response && 'success' in response ? 'Успешно' : null}
 				<Form.Item>
 					{code.length === 6 ? (
 						<Button

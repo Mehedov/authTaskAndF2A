@@ -1,19 +1,23 @@
 import logo from '@/assets/logo.svg'
-import { useLoginMutation } from '@/services/authServices'
 import type { ErrorMessageRes, LoginResponse } from '@/services/mockApi'
 import { type ILoginAuth } from '@/types/authTypes'
 import { LockOutlined, UserOutlined } from '@ant-design/icons'
 import { Button, Card, Form, Input, Typography } from 'antd'
-import { useState } from 'react'
+import { useState, type SetStateAction } from 'react'
 import styles from './FormLogin.module.css'
 
 const { Title } = Typography
 
 interface Props {
-	setStep: React.Dispatch<React.SetStateAction<'2fa' | 'login'>>
+	handleLogin: (
+		values: ILoginAuth,
+		callback: React.Dispatch<
+			SetStateAction<LoginResponse | ErrorMessageRes | null>
+		>
+	) => Promise<LoginResponse | ErrorMessageRes | undefined>
 }
 
-export default function FormLogin({ setStep }: Props) {
+export default function FormLogin({ handleLogin }: Props) {
 	const [formData, setFormData] = useState<ILoginAuth>({
 		email: '',
 		password: '',
@@ -21,24 +25,6 @@ export default function FormLogin({ setStep }: Props) {
 	const [response, setResponse] = useState<
 		LoginResponse | ErrorMessageRes | null
 	>(null)
-
-	const loginMutation = useLoginMutation()
-
-	const handleLogin = async (values: ILoginAuth) => {
-		try {
-			const res = await loginMutation.mutateAsync(values)
-			setResponse(res)
-			if ('status' in res) {
-				return Promise.reject(res)
-			}
-			if (res.requires2FA) {
-				setStep('2fa')
-			}
-			return res
-		} catch (e) {
-			console.log(e)
-		}
-	}
 
 	return (
 		<Card
@@ -89,6 +75,7 @@ export default function FormLogin({ setStep }: Props) {
 					/>
 				</Form.Item>
 				{response && 'message' in response ? response.message : null}
+				{response && 'success' in response ? 'Успешно' : null}
 				<Form.Item shouldUpdate>
 					<Button
 						style={{
@@ -96,10 +83,10 @@ export default function FormLogin({ setStep }: Props) {
 						}}
 						type='primary'
 						htmlType='submit'
-						onClick={() => handleLogin(formData)}
+						onClick={() => handleLogin(formData, setResponse)}
 						size='large'
 					>
-						Log in 
+						Log in
 					</Button>
 				</Form.Item>
 			</Form>

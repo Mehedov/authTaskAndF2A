@@ -1,5 +1,5 @@
-export type LoginResponse = { success: boolean; requires2FA?: boolean }
-export type TwoFAResponse = { success: boolean }
+export type LoginResponse = { success: boolean; requires2FA?: boolean; token: string }
+export type TwoFAResponse = { success: boolean; token: string }
 export type ErrorMessageRes = {
 	status: number
 	message: string
@@ -25,7 +25,7 @@ export const mockLoginApi = async (
 		return { status: 401, message: 'Неверный логин или пароль' }
 	}
 
-	return { success: true, requires2FA: true }
+	return { success: true, requires2FA: true, token: 'token' }
 }
 
 export const mock2FAApi = async (
@@ -38,5 +38,5 @@ export const mock2FAApi = async (
 		return { status: 401, message: 'Неправильный код' }
 	}
 
-	return { success: true }
+	return { success: true, token: 'token' }
 }
